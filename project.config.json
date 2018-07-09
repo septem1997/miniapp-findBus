@@ -1,0 +1,13 @@
+{
+  "description": "巴士去哪了",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram",
+  "appid": "wxcc0003052b00ddb0",
+  "projectname": "find_bus",
+  "miniprogramRoot": "./dist"
+}

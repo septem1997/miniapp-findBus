@@ -1,0 +1,690 @@
+<style lang="less">
+  #map {
+    width: 100%;
+    /*position: fixed;*/
+    transition: height 500ms;
+  }
+
+  #myLocation {
+    position: fixed;
+    left: 0;
+    bottom: 30%;
+    margin-left: 5px;
+    width: 50rpx;
+    height: 50rpx;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    background: white;
+  }
+
+  #myLocation cover-image {
+    width: 70%;
+    height: 70%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  #setting {
+    position: fixed;
+    left: 0;
+    bottom: 40%;
+    margin-left: 5px;
+    width: 50rpx;
+    height: 50rpx;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    background: white;
+  }
+
+  #setting cover-image {
+    width: 70%;
+    height: 70%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  #topBar {
+    display: flex;
+    margin-top: 50rpx;
+    width: 550rpx;
+    height: 70rpx;
+    border-radius: 20rpx;
+    margin-left: auto;
+    margin-right: auto;
+    background: white;
+    border: 1px solid lightgray;
+    align-items: center;
+  }
+
+  #topShadow {
+    height: 15rpx;
+    width: 100%;
+    position: fixed;
+    top: 0;
+  }
+
+  #search {
+    width: 100%;
+    height: 60rpx;
+    margin-left: auto;
+    position: relative;
+  }
+  #search input{
+    width: 100%;
+    height: 100%;
+    line-height: 60rpx;
+    color: darkcyan;
+    position: absolute;
+  }
+  #keyword{
+    width: 100%;
+    height: 100%;
+    line-height: 60rpx;
+    color: darkcyan;
+    position: absolute;
+  }
+
+  #fakeInput{
+    height: 60rpx;
+    width: 10rpx;
+    position: absolute;
+    line-height: 60rpx;
+    color: gray;
+  }
+
+  #searchIcon {
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+    overflow: visible;
+  }
+
+  #searchIcon cover-image{
+    width: 40rpx;
+    height: 40rpx;
+  }
+
+  #mask{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #888888;
+    opacity: 0.3;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+  #suggestion {
+    width: 550rpx;
+    background: white;
+    border-radius: 20rpx;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20rpx;
+    background: white;
+    border: 1px solid lightgray;
+  }
+
+  #suggestionList {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #routes{
+    width: 550rpx;
+    background: white;
+    border-radius: 20rpx;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20rpx;
+    background: white;
+    border: 1px solid lightgray;
+    font-size: 26rpx;
+  }
+
+  #routeList{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .routeItem{
+    margin-top: 20rpx;
+    margin-bottom: 20rpx;
+  }
+
+  .routeContent{
+    display: flex;
+    font-size: 26rpx;
+    align-items: center;
+  }
+
+  .routeInfo{
+    width: 150rpx;
+    text-align: right;
+  }
+
+
+  .suggestionItem{
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20rpx;
+    margin-bottom: 20rpx;
+  }
+
+  .divLine{
+    height: 1rpx;
+    width: 100%;
+    background-color: lightgray;
+  }
+
+  .divLine-ver{
+    height: 80rpx;
+    margin-left: 10rpx;
+    margin-right: 10rpx;
+    width: 1rpx;
+    background-color: lightgray;
+  }
+  #routeDetail{
+    width: 100%;
+    /*position: fixed;*/
+    height: 60vh;
+    /*bottom: 0;*/
+  }
+
+  #back{
+    background-color: gray;
+    opacity: 0.5;
+    border-radius: 50%;
+    height: 60rpx;
+    width: 60rpx;
+    position: fixed;
+    top: 60rpx;
+    font-size: 45rpx;
+    text-align: center;
+    left: 20rpx;
+  }
+
+  .circleText{
+    border-radius:50%;
+    height:45rpx;
+    width:45rpx;
+    background-color:red;
+    color:white;
+    line-height:45rpx;
+    font-size:28rpx;
+    text-align:center;
+  }
+
+  .stepHead{
+    display: flex;
+  }
+
+  .stepTitle{
+    font-size: 32rpx;
+    margin-left: 10rpx;
+  }
+
+  .walkingDetail{
+    padding:10px;
+    border-left:gray 10rpx dotted;
+    color:gray;
+    font-size:28rpx;
+    margin:20rpx;
+  }
+
+  .busDetail{
+    padding:20rpx;
+    padding-left: 30rpx;
+    border-left:blue 5rpx solid;
+    color:gray;
+    font-size:28rpx;
+    margin-left:20rpx;
+  }
+
+  #steps{
+    margin: 10rpx;
+  }
+
+</style>
+
+
+<template>
+
+  <map style="height: {{showRouteDetail?40:100}}vh;" polyline="{{polyline}}" id="map" @tap="showOrhideView('showSuggestion','')" latitude="{{lat}}" longitude="{{lng}}" show-location scale="14">
+
+    <cover-view @tap="back" id="back" wx:if="{{showRouteDetail}}">
+      ﹤
+    </cover-view>
+
+    <!--<cover-view id="topShadow">-->
+      <!--<cover-image src="../image/shadow-top.png"></cover-image>-->
+    <!--</cover-view>-->
+
+    <cover-view wx:if="{{!showRouteDetail}}" @tap="onLocateTap" id="myLocation">
+      <cover-image src="../image/locate.png"></cover-image>
+    </cover-view>
+
+    <cover-view wx:if="{{!showRouteDetail}}" @tap="openSetting" id="setting">
+      <cover-image src="../image/setting.png"></cover-image>
+    </cover-view>
+
+    <!--<cover-view @tap="setShowSuggestion()" id="mask" wx:if="{{showSuggestion}}"></cover-view>-->
+
+
+    <cover-view id="topBar" wx:if="{{!showRouteDetail}}" @tap.stop="showOrHideView('showSuggestion','true')">
+      <cover-view id="searchIcon">
+        <cover-image src="../image/search.png"></cover-image>
+      </cover-view>
+      <cover-view id="search">
+        <cover-view wx:if="{{!isFocus}}" id="keyword">{{keyword}}</cover-view>
+        <input @focus.stop="onFocus"  @blur.stop="onBlur" focus="{{showSuggestion}}"  @input="input" />
+      </cover-view>
+    </cover-view>
+
+    <cover-view @tap="showOrHideView('showSuggestion','')" id="suggestion" wx:if="{{showSuggestion && suggestionList.length}}">
+      <repeat id="suggestionList" for="{{suggestionList}}" key="index" index="index" item="item">
+        <cover-view @tap="search({{item}})" class="suggestionItem">{{item.title}}</cover-view>
+      </repeat>
+    </cover-view>
+
+    <cover-view @tap="showOrHideView('showRoutes','')" id="routes" wx:if="{{showRoutes && routeList.length}}">
+      <repeat id="routeList" for="{{routeList}}" key="index" index="index" item="item">
+        <cover-view class="divLine" wx:if="{{index !== 0}}"></cover-view>
+        <cover-view class="routeItem" @tap="showRoute({{index}})">
+          <!--<cover-view style="text-align: center">方案{{index}}</cover-view>-->
+          <cover-view  class="routeContent">
+            <cover-view class="routeInfo">
+              <cover-view>步行{{item.walking}}米</cover-view>
+              <cover-view>{{item.duration}}分钟</cover-view>
+            </cover-view>
+            <cover-view class="divLine-ver"></cover-view>
+            <cover-view class="busInfo">
+              <repeat for="{{item.busInfo}}" key="index" index="index" item="item">
+                <cover-view style="margin-top: 5rpx">
+                  <cover-image style="float: left;width: 35rpx;height: 35rpx" src="../image/bus.png"></cover-image>
+                  <cover-view style="overflow: hidden;text-overflow:ellipsis;white-space: nowrap;">{{item}}</cover-view>
+                </cover-view>
+              </repeat>
+              <cover-view style="margin-top: 10rpx;color: gray">{{item.firstStation}}上车</cover-view>
+            </cover-view>
+          </cover-view>
+        </cover-view>
+      </repeat>
+    </cover-view>
+  </map>
+
+  <view id="routeDetail" wx:if="{{showRouteDetail}}">
+    <swiper bindchange="routeChange" current="{{currentRouteIndex}}" indicator-active-color="#448AFF"
+            indicator-dots="true" style="height: 160rpx;border-bottom: lightgray 1px solid">
+      <repeat for="{{routeList}}" key="index" index="index" item="item">
+        <swiper-item style="margin: 20rpx;">
+          <view>
+            <image style="float: left;width: 35rpx;height: 35rpx" src="../image/bus.png"></image>
+            <view style="font-size: 28rpx">{{item.busInfo[0]}}</view>
+          </view>
+          <view style="font-size: 28rpx;color: gray">
+            步行{{item.walking}}米 | {{item.duration}}分钟 | {{item.firstStation}}上车
+          </view>
+        </swiper-item>
+      </repeat>
+    </swiper>
+    <view id="steps">
+      <view class="stepHead">
+        <view class="circleText" style="background-color: green">起</view>
+        <view class="stepTitle">我的位置</view>
+      </view>
+      <repeat for="{{routeList[currentRouteIndex].steps}}" key="index" index="index" item="step" >
+        <view wx:if="{{step.mode==='WALKING'}}" class="walkingDetail">
+            步行{{step.distance}}米({{step.duration}}分钟)
+        </view>
+
+        <view wx:if="{{step.mode==='TRANSIT'}}">
+          <swiper bindchange="lineChange({{index}})" current="{{step.currentLineIndex}}" indicator-active-color="#448AFF"
+                  indicator-dots="true" style="height: calc(190rpx + {{step.lines[step.currentLineIndex].station_count*80}}rpx)">
+            <repeat for="{{step.lines}}" key="index" index="index" item="item">
+              <swiper-item >
+                <view class="stepHead">
+                  <view class="circleText" style="background-color: blue">巴</view>
+                  <view class="stepTitle">{{item.title}}</view>
+                </view>
+                <view class="busDetail" style="font-size: 28rpx;color: gray;border-left-color: darkolivegreen">
+                  <text>{{item.destination.title}}方向\n首班车：{{item.start_time}} 末班车：{{item.end_time}}</text>
+                  <text style="color: orangered">\n{{item.disText}}</text>
+                </view>
+                <view class="stepHead">
+                  <view class="circleText" style="background-color: blue">上</view>
+                  <view class="stepTitle">{{item.geton.title}}</view>
+                </view>
+                <repeat for="{{item.stations}}" key="index" index="index" item="station">
+                    <view wx:if="{{index !== item.stations.length-1}}" class="busDetail" style="font-size: 28rpx;color: gray">{{station.title}}</view>
+                </repeat>
+                <view class="stepHead">
+                  <view class="circleText" style="background-color: blue">下</view>
+                  <view class="stepTitle">{{item.getoff.title}}</view>
+                </view>
+              </swiper-item>
+            </repeat>
+          </swiper>
+        </view>
+      </repeat>
+      <view class="stepHead">
+        <view class="circleText">终</view>
+        <view class="stepTitle">{{destination}}</view>
+      </view>
+    </view>
+  </view>
+
+</template>
+<script>
+  import wepy from 'wepy';
+  import Util from '../util/util';
+
+  export default class map extends wepy.page {
+    customData = {};  // 自定义数据
+
+    customFunction() {
+    }  // 自定义方法
+
+    async onLoad() {
+      let res = wepy.getSystemInfoSync();
+      this.windowHeight = res.windowHeight;
+      this.mapCtx = await wepy.createMapContext('map');
+      this.mapCtx.moveToLocation();
+    }  // 在Page和Component共用的生命周期函数
+
+    async getLocation() {
+      wepy.getLocation({
+        type: 'gcj02'
+      }).then((res) => {
+        console.log(res)
+        this.lng = res.longitude;
+        this.lat = res.latitude;
+        this.$apply()
+      }).catch((err) => {
+        console.log(err);
+        wx.showModal({
+          title: '获取位置失败',
+          content: '请点击右上角设置按钮，选择“授权设置”，同意打开位置授权',
+          showCancel: false
+        });
+      });
+    }
+
+
+    async onShow() {
+      await this.getLocation();
+    }  // 只在Page中存在的页面生命周期函数
+
+    config = {
+      navigationBarTitleText: '巴士到哪了'
+    };  // 只在Page实例中存在的配置数据，对应于原生的page.json文件
+
+    data = {
+      lng: 0,
+      lat: 0,
+      showMap: true,
+      windowHeight: 1000,
+      showSuggestion: false,
+      suggestionList: [],
+      keyword:'你想去哪？',
+      fakeInputText:'',
+      isFocus:false,
+      polyline:[],
+      routeList:[],
+      showRoutes:false,
+      showRouteDetail:false,
+      destination:'',
+      currentRouteIndex:0
+    };  // 页面所需数据均需在这里声明，可用于模板数据绑定
+
+    components = {};  // 声明页面中所引用的组件，或声明组件中所引用的子组件
+
+    mixins = [];  // 声明页面所引用的Mixin实例
+
+    computed = {};  // 声明计算属性（详见后文介绍）
+
+    watch = {};  // 声明数据watcher（详见后文介绍）
+    drawPolyline(route) {
+      console.log(route)
+      let p = []
+      for(let step of route.steps){
+        let polyline = null
+        let config = {
+          points:[],
+          width: 5,
+          arrowLine:true
+        }
+        if(step.mode==='WALKING'){
+          polyline = step.polyline
+          config.color="#888888"
+        }
+        if (step.mode==='TRANSIT'){
+          polyline = step.lines[0].polyline
+          config.color='#0091ff'
+        }
+        if (polyline){
+          for (let i = 2; i < polyline.length ; i++) {
+            polyline[i] = polyline[i-2] + polyline[i]/1000000
+          }
+          for(let j = 0;j<polyline.length;j+=2){
+            config.points.push({
+              longitude:polyline[j+1],
+              latitude:polyline[j]
+            })
+          }
+          p.push(config)
+        }
+      }
+      this.polyline = p
+      this.$apply()
+    }
+    methods = {
+      openSetting:function(){
+        wepy.navigateTo({
+          url: 'setting'
+        })
+      },
+      back:function(){
+        this.showRouteDetail=false
+        this.polyline=[]
+      },
+      routeChange:async function(e){
+        this.currentRouteIndex = e.detail.current
+        let route = this.routeList[this.currentRouteIndex]
+        let step = route.steps[route.firstBusLinesIndex]
+        this.drawPolyline(route)
+        await this.searchBusInfo(step.lines[step.currentLineIndex],true)
+      },
+      lineChange:async function(index,e){
+        console.log('lineChange',index,e)
+        this.routeList[this.currentRouteIndex].steps[index].currentLineIndex = e.detail.current
+        let route = this.routeList[this.currentRouteIndex]
+        await this.searchBusInfo(route.steps[index].lines[e.detail.current],route.firstBusLinesIndex===index)
+      },
+      showOrHideView:function(name,b){
+        this[name] = b
+      },
+      onFocus:function(){
+        this.isFocus = true
+        this.showRoutes=false
+      },
+      onBlur:function(){
+        this.isFocus = false
+        this.showSuggestion=false
+      },
+      showRoute:async function(index){
+        console.log("选中方案",index,this.routeList[index])
+        this.currentRouteIndex=index
+        this.showRouteDetail=true
+        let route  = this.routeList[index]
+        this.drawPolyline(route)
+        await this.searchBusInfo(route.steps[route.firstBusLinesIndex].lines[0],true)
+      },
+      input: function(e) {
+        let that = this;
+        console.log(e)
+        let keyword = e.detail.value;
+        if (!keyword||keyword===''){
+          this.keyword = '你想去哪？';
+          return
+        }
+        this.keyword = keyword;
+        Util.myRequest({
+          url: 'https://apis.map.qq.com/ws/place/v1/suggestion/',
+          data: {
+            region: '珠海',
+            keyword: keyword,
+            key: Util.MapKey
+          }
+        }).then(res => {
+          console.log(res);
+          that.suggestionList = res.data.data;
+          that.showSuggestion = true;
+          that.$apply();
+        });
+      },
+      search:async function(item) {
+        console.log(item)
+        await wepy.getLocation({
+          type: 'gcj02'
+        }).then((res) => {
+          this.lng = res.longitude;
+          this.lat = res.latitude;
+        })
+        this.destination = item.title
+        let res = await Util.myRequest({
+          url: 'http://apis.map.qq.com/ws/direction/v1/transit/',
+          data:{
+            from:this.lat + ',' + this.lng,
+            to:item.location.lat+','+item.location.lng,
+            policy:'LEAST_TIME',
+            key:Util.MapKey
+          }
+        });
+        this.routeList = res.data.result.routes
+        for(let route of this.routeList){
+          route.busInfo = []
+          route.walking = 0
+          let setFirstLine = false
+          for(let i = 0;i<route.steps.length;i++){
+            let step = route.steps[i]
+            if (i===0&&step.mode==='WALKING'){
+              route.walking = step.distance
+            }
+            if(step.mode==='TRANSIT'){
+              step.currentLineIndex = 0
+              if (!setFirstLine){
+                route.firstBusLinesIndex = i
+                setFirstLine = true
+              }
+              let lines = []
+              for(let j =0 ;j<step.lines.length;j++){
+                let line  = step.lines[j]
+                if (!route.firstStation){
+                  route.firstStation = line.geton.title
+                }
+                line.getoff = step.lines[0].getoff
+                line.geton = step.lines[0].geton
+                lines.push(line.title)
+              }
+              route.busInfo.push(lines.join('/'))
+            }
+          }
+        }
+        this.showRoutes=true
+        this.$apply()
+        // let route = res.data.result.routes[0]
+        // this.drawPolyline(route)
+      },
+      onLocateTap: async function() {
+        this.getLocation()
+        this.mapCtx.moveToLocation();
+      }
+    };  // 声明页面wxml中标签的事件处理函数。注意，此处只用于声明页面wxml中标签的bind、catch事件，自定义方法需以自定义方法的方式声明
+
+    async searchBusInfo(line,isFirstBusLine){
+      console.log("line",line)
+      let route =  this.routeList[this.currentRouteIndex]
+      await Util.myRequest({
+        url:'http://www.zhbuswx.com/Handlers/BusQuery.ashx?handlerName=GetLineListByLineName&key='+line.title+'&_='+new Date().getTime()
+      }).then((res)=>{
+        console.log("GetLineListByLineName",res)
+        for(let l of res.data.data){
+          if(line.destination.title===l.ToStation){
+            line.lineId = l.Id
+            line.fromStation = l.FromStation
+            break;
+          }
+        }
+        return Util.myRequest({
+          loadingText:'获取公交车站点',
+          url:'http://www.zhbuswx.com/Handlers/BusQuery.ashx?handlerName=GetStationList',
+          data:{
+            lineId:line.lineId,
+            _:new Date().getTime()
+          }
+        })
+      }).then((res)=>{
+        console.log('GetStationList',res)
+        line.allStations = []
+        let noStations = false
+        let startPush = false
+        if(!line.stations ){
+          noStations = true
+          line.stations = []
+        }
+        for(let i = 0; i<res.data.data.length;i++){
+          let s = res.data.data[i]
+          s.index = i+1
+          line.allStations[s.Name] = s
+          if (noStations){
+            if (startPush){
+              line.stations.push({title:s.Name})
+            }
+            if (line.getoff.title===s.Name){
+              noStations=false
+            }
+            if(line.geton.title===s.Name){
+              startPush=true
+            }
+          }
+        }
+        if (!isFirstBusLine){
+          this.$apply()
+          console.log(this.routeList)
+          throw ''
+        }
+        this.$apply()
+        return Util.myRequest({
+          loadingText:'获取公交车位置',
+          url:'http://www.zhbuswx.com/Handlers/BusQuery.ashx?handlerName=GetBusListOnRoad',
+          data:{
+            lineName:line.title,
+            fromStation:line.fromStation,
+            _:new Date().getTime()
+          }
+        })
+      }).then((res)=>{
+        console.log('GetBusListOnRoad',res)
+        let myIndex = line.allStations[route.firstStation].index
+        line.dis = 999
+        line.disText = '未发车'
+        console.log('GetBusListOnRoad')
+        for(let bus of res.data.data){
+          let dis = myIndex - line.allStations[bus.CurrentStation].index
+          if(dis<=0){
+            break;
+          }
+          line.dis = dis
+          line.disText = '最近班车距离'+dis+'站'
+        }
+        this.$apply()
+      }).catch(()=>{})
+    }
+    events = {};  // 声明组件之间的事件处理函数
+  }
+</script>
